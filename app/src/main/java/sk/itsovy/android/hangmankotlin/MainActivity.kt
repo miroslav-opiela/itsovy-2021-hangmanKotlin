@@ -1,5 +1,6 @@
 package sk.itsovy.android.hangmankotlin
 
+import android.content.Context
 import android.graphics.ColorFilter
 import android.graphics.LightingColorFilter
 import androidx.appcompat.app.AppCompatActivity
@@ -9,6 +10,8 @@ import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
@@ -68,7 +71,76 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onImageClick(view: View) {
+        if (game!!.attemptsLeft == 0 || game!!.isWon) {
+            restartGame()
+            return
+        }
 
+        // mozme si vybrat ci chceme CharSequence alebo CharSequence?
+        val text: CharSequence? = editText.text
+
+        if (text == null || text.isEmpty()) {
+            Toast.makeText(this, R.string.toast_insert_a_letter, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val letter = Character.toLowerCase(text[0])
+
+        if (letter in 'a'..'z') {
+            val success = game!!.guess(letter)
+            if (success) {
+                updateText()
+                // ak sme uhadli a vyhrali hru
+                if (game!!.isWon) {
+                    imageView.colorFilter = WON_GAME
+                    if (game is HangmanGame) {
+                        val g = game as HangmanGame
+                        updateBestTime(g.time)
+                    }
+                }
+            } else {
+                updateImage()
+                if (game!!.attemptsLeft == 0) {
+                    imageView.colorFilter = LOST_GAME
+                    textView.setText(game!!.challengeWord)
+                }
+            }
+        } else {
+            // nie je to pismeno
+            Toast.makeText(this, R.string.toast_message, Toast.LENGTH_SHORT).show()
+        }
+        editText.setText("")
+
+    }
+
+    private fun updateBestTime(time: Long) {
+// SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
+//        // ak tam hodnota nie je, tak berie default hodnotu MAX_VALUE
+//        long bestTime = pref.getLong(BEST_TIME_KEY, Long.MAX_VALUE);
+//        if (time < bestTime) {
+//            SharedPreferences.Editor editor = pref.edit();
+//            editor.putLong(BEST_TIME_KEY, time);
+//            editor.apply();
+//            announceNewBestTime(time);
+//        }
+
+        val pref = getPreferences(Context.MODE_PRIVATE)
+        val bestTime = pref.getLong(BEST_TIME_KEY, Long.MAX_VALUE)
+        if (time < bestTime) {
+            with (pref.edit()) {
+                putLong(BEST_TIME_KEY, time)
+                apply()
+            }
+            announceNewBestTime(time)
+        }
+
+    }
+
+    private fun announceNewBestTime(time: Long) {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(R.string.new_best_time).setMessage(getString(R.string.your_time_is, time))
+        val dialog = builder.create()
+        dialog.show()
 
     }
 
