@@ -19,6 +19,7 @@ class HangmanGame(words: Array<String>, random: Random) : Game {
     override val isWon: Boolean
         get() = uncoveredWord.toString() == challengeWord
 
+    // private set nastavi setter ako viditelny iba v tejto triede
     override var attemptsLeft = Game.DEFAULT_ATTEMPTS_LEFT
         private set
 
