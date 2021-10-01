@@ -9,9 +9,9 @@ interface Game : Serializable {
         const val UNGUESSED_CHAR = '_'
     }
 
-    fun isWon(): Boolean
-    fun guessedCharacters() : CharSequence
-    fun challengeWord() : String
-    fun attemptsLeft() : Int
+    val isWon: Boolean
+    val guessedCharacters : CharSequence
+    val challengeWord : String
+    val attemptsLeft : Int
     fun guess(character: Char) : Boolean
 }
